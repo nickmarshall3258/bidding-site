@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta http-equiv="content-language" content="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Party Favor Bid Board</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280; --border: #e5e7eb; --accent: #2f5bea;
+    --gold: #fde68a; --gold-b: #f59e0b;
+    --silver: #e5e7eb; --silver-b: #9ca3af;
+    --bronze: #fed7aa; --bronze-b: #ea580c;
+    --fourth: #bfdbfe; --fourth-b: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 20px; }
+  .wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .hidden { display: none !important; }
+  input { width: 100%; padding: 10px 12px; margin: 6px 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
+  label { font-size: 14px; color: var(--muted); }
+  button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font-size: 15px; cursor: pointer; }
+  button.secondary { background: #e5e7eb; color: var(--text); }
+  button:disabled { opacity: .6; cursor: default; }
+  .login { max-width: 380px; margin: 60px auto; }
+  #bgWrap { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #08120d; }
+  #bgWrap video { width: 100%; height: 100%; object-fit: cover; }
+  #bgWrap::after { content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at center, rgba(5,14,9,.45) 0%, rgba(3,8,5,.85) 100%),
+      linear-gradient(180deg, rgba(120,10,25,.28), rgba(8,40,24,.35)); }
+
+  /* ---- Christmas login theme ---- */
+  body.auth { background: #08120d; }
+  body.auth header { background: transparent; border-bottom: 0; color: #f6e7b4; position: relative; z-index: 2; padding-top: 26px; }
+  body.auth header h1 { font-family: Georgia, 'Times New Roman', serif; letter-spacing: .5px; }
+  .login.card { position: relative; z-index: 2; background: rgba(9,20,14,.82); backdrop-filter: blur(8px);
+    border: 1px solid rgba(214,174,70,.55); color: #f3efe2;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 10px 40px rgba(0,0,0,.65), 0 0 36px rgba(200,16,46,.22); }
+  .login .xmas-title { font-family: Georgia, 'Times New Roman', serif; font-size: 26px; text-align: center; color: #f6d77a; margin: 0 0 4px; text-shadow: 0 0 14px rgba(246,215,122,.35); }
+  .login .xmas-sub { text-align: center; color: #b9c7bb; font-size: 14px; margin: 0 0 18px; }
+  .login label { color: #cdbf9a; }
+  .login input { background: rgba(255,255,255,.07); color: #fff; border-color: rgba(214,174,70,.35); }
+  .login input:focus { outline: none; border-color: #f6d77a; box-shadow: 0 0 0 3px rgba(246,215,122,.2); }
+  .login .tabs button { background: rgba(255,255,255,.08); color: #e8e0c8; }
+  .login .tabs button.active { background: #b3202a; color: #fff; }
+  .login #authSubmit { background: linear-gradient(180deg, #d4202f, #9d1420); font-weight: 600; letter-spacing: .3px; box-shadow: 0 4px 14px rgba(200,16,46,.4); }
+  .login #authSubmit:hover { filter: brightness(1.12); }
+  .login .error { color: #ff9a9a; }
+  #lights { position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 3; pointer-events: none; display: none; overflow: visible; }
+  body.auth #lights { display: block; }
+  #lights::before { content: ""; position: absolute; top: 4px; left: -2%; right: -2%; height: 14px; border-top: 2px solid #1b1b1b; border-radius: 50%; }
+  #lights span { position: absolute; top: 12px; width: 10px; height: 16px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; animation: twinkle 1.8s infinite ease-in-out; }
+  @keyframes twinkle { 0%,100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: .35; filter: brightness(.7); } }
+  #snow { position: fixed; inset: 0; z-index: 1; pointer-events: none; display: none; }
+  body.auth #snow, body.app #snow { display: block; }
+  @media (prefers-reduced-motion: reduce) { #lights span { animation: none; } }
+
+  /* ---- Christmas bid page ---- */
+  body.app { background: #08120d; }
+  #castle { position: fixed; inset: 0; z-index: -1; overflow: hidden; display: none; background: #060b1f; }
+  body.app #castle { display: block; }
+  #castle svg { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; transform-origin: 50% 100%; animation: breathe 80s ease-in-out infinite alternate; }
+  #castle .L { animation-duration: 80s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  #castle .L0 { animation-name: pan0; }
+  #castle .L1 { animation-name: pan1; }
+  #castle .L2 { animation-name: pan2; }
+  #castle .L3 { animation-name: pan3; }
+  @keyframes pan0 { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+  @keyframes pan1 { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+  @keyframes pan2 { from { transform: translateX(-55px); } to { transform: translateX(55px); } }
+  @keyframes pan3 { from { transform: translateX(-100px); } to { transform: translateX(100px); } }
+  @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.06); } }
+  @keyframes flicker { 0%,100% { opacity: 1; } 45% { opacity: .8; } 60% { opacity: 1; } 75% { opacity: .9; } }
+  @keyframes bulbglow { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  #castle .win { animation: flicker 4s infinite ease-in-out; }
+  #castle .bulb { animation: bulbglow 2.2s infinite ease-in-out; }
+  @media (prefers-reduced-motion: reduce) { #castle svg, #castle .L, #castle .win, #castle .bulb { animation: none; } }
+
+  body.app header { background: rgba(7,15,11,.6); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(214,174,70,.35); color: #f6e7b4; position: relative; z-index: 2; }
+  body.app header h1 { font-family: Georgia, 'Times New Roman', serif; letter-spacing: .5px; }
+  body.app #who { color: #e8e0c8; }
+  body.app .wrap { position: relative; z-index: 2; }
+  body.app .card { background: rgba(8,18,13,.66); backdrop-filter: blur(5px); border: 1px solid rgba(214,174,70,.45); color: #f3efe2; box-shadow: 0 10px 34px rgba(0,0,0,.5); }
+  body.app label { color: #cdbf9a; }
+  body.app .card h2 { font-family: Georgia, 'Times New Roman', serif; color: #f6d77a; }
+  body.app .big { color: #f6d77a; text-shadow: 0 0 16px rgba(246,215,122,.3); }
+  body.app input { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(214,174,70,.35); }
+  body.app input:focus { outline: none; border-color: #f6d77a; box-shadow: 0 0 0 3px rgba(246,215,122,.2); }
+  body.app #bidBtn { white-space: nowrap; }
+  body.app #bidBtn, body.app #confirmBid { background: linear-gradient(180deg, #d4202f, #9d1420); font-weight: 600; box-shadow: 0 4px 14px rgba(200,16,46,.4); }
+  body.app button.secondary { background: rgba(255,255,255,.14); color: #f3efe2; box-shadow: none; }
+  body.app .error { color: #ff9a9a; }
+  body.app .ok { color: #7ee2a8; }
+  body.app .empty { color: #b9c7bb; }
+  body.app li { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #f3efe2; }
+  body.app li.r1 { background: #c8102e; border-color: #e8475f; border-left-color: #7a0a1c; color: #fff; box-shadow: 0 0 14px rgba(200,16,46,.5); }
+  body.app li.r2 { background: #1f8a4c; border-color: #46c57f; border-left-color: #0d5a2b; color: #fff; box-shadow: 0 0 14px rgba(31,138,76,.5); }
+  body.app li.r3 { background: #ffffff; border-color: #e2e8f0; border-left-color: #b8c4d6; color: #1d2330; box-shadow: 0 0 14px rgba(255,255,255,.35); }
+  body.app li.r4 { background: #a8dcff; border-color: #d2ecff; border-left-color: #3b8fd9; color: #0f2a44; box-shadow: 0 0 14px rgba(120,200,255,.45); }
+  body.app li.me .name::after { color: inherit; opacity: .7; }
+  .bid-break { font-size: 13px; color: #b9c7bb; margin: -10px 0 14px; min-height: 0; }
+  .bid-break:empty { display: none; }
+  .col { display: flex; flex-direction: column; gap: 20px; }
+  .hint { font-size: 13px; color: #b9c7bb; margin: -6px 0 12px; }
+  .ticket { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-top: 16px; border: 1px solid rgba(214,174,70,.4); border-radius: 10px; background: rgba(255,255,255,.05); cursor: pointer; }
+  .ticket input { width: 22px; height: 22px; margin: 0; padding: 0; flex: none; accent-color: #c8102e; cursor: pointer; }
+  .ticket-text { display: flex; flex-direction: column; gap: 2px; }
+  .ticket-text strong { font-size: 15px; color: #f3efe2; }
+  .ticket-text small { font-size: 13px; color: #b9c7bb; }
+  .ticket.have { background: rgba(31,138,76,.22); border-color: #46c57f; }
+  .ticket.have input { accent-color: #1f8a4c; }
+  .fav-sub { margin: 4px 0 14px; color: #b9c7bb; font-size: 14px; }
+  .fav-body { min-height: 170px; border: 2px dashed rgba(214,174,70,.35); border-radius: 10px; padding: 14px; display: flex; align-items: center; justify-content: center; text-align: center; color: #f3efe2; }
+  .fav-body .fav-empty { color: #8fa296; font-style: italic; }
+  .sum { margin: 12px 0 8px; border: 1px solid rgba(214,174,70,.35); border-radius: 10px; overflow: hidden; }
+  .sumrow { display: flex; justify-content: space-between; padding: 9px 12px; font-size: 15px; }
+  .sumrow + .sumrow { border-top: 1px solid rgba(255,255,255,.1); }
+  .sumrow.total { background: rgba(214,174,70,.16); font-size: 17px; color: #f6d77a; }
+  .sum-note { font-size: 14px; color: #cdd8cf; margin: 10px 0 0; }
+  .countdown { position: relative; z-index: 2; width: calc(100% - 32px); max-width: 968px; margin: 14px auto 0; padding: 12px 18px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px;
+    background: rgba(8,18,13,.72); backdrop-filter: blur(6px); border: 1px solid rgba(214,174,70,.45); border-radius: 12px; color: #f3efe2;
+    box-shadow: 0 8px 28px rgba(0,0,0,.45); }
+  body.auth .countdown { max-width: 380px; flex-direction: column; text-align: center; }
+  body.auth .login { margin: 16px auto 40px; }
+  .cd-label { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: #f6d77a; }
+  .cd-party { font-size: 14px; color: #cdd8cf; margin-top: 2px; }
+  .cd-units { display: flex; gap: 8px; }
+  .cd-units div { min-width: 62px; text-align: center; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 6px 4px; }
+  .cd-units b { display: block; font-size: 24px; line-height: 1.15; font-variant-numeric: tabular-nums; color: #fff; }
+  .cd-units span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #b9c7bb; }
+  .countdown.closed .cd-label { color: #ff9a9a; }
+  button.danger { margin-top: 14px; background: transparent; color: #ff9a9a; border: 1px solid rgba(255,130,130,.55); }
+  button.danger:hover:not(:disabled) { background: rgba(200,16,46,.2); }
+  button.danger-solid { background: linear-gradient(180deg, #d4202f, #9d1420); color: #fff; font-weight: 600; }
+  .modal { z-index: 10; }
+  body.app .modal { background: rgba(0,0,0,.6); }
+  body.app .modal .box { background: #0f1c15; color: #f3efe2; border: 1px solid rgba(214,174,70,.5); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tabs button { flex: 1; background: #eef0f4; color: var(--text); }
+  .tabs button.active { background: var(--accent); color: #fff; }
+  .error { color: #b91c1c; font-size: 14px; min-height: 20px; margin-top: 8px; }
+  .ok { color: #047857; font-size: 14px; min-height: 20px; margin-top: 8px; }
+  .layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+  .big { font-size: 32px; font-weight: 700; margin: 4px 0 16px; }
+  .row { display: flex; gap: 10px; }
+  .row input { margin: 0; }
+  ol { list-style: none; margin: 12px 0 0; padding: 0; }
+  li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); border-left-width: 6px; }
+  li .rank { width: 24px; font-weight: 700; }
+  li .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  li .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
+  li.me .name::after { content: " (you)"; color: var(--muted); font-weight: 400; }
+  li.r1 { background: var(--gold); border-left-color: var(--gold-b); }
+  li.r2 { background: var(--silver); border-left-color: var(--silver-b); }
+  li.r3 { background: var(--bronze); border-left-color: var(--bronze-b); }
+  li.r4 { background: var(--fourth); border-left-color: var(--fourth-b); }
+  .empty { color: var(--muted); font-size: 14px; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal .box { background: #fff; border-radius: 12px; padding: 24px; max-width: 360px; width: 100%; }
+  .modal .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<!-- Login background video: put your file at public/video.mp4 (or change the src below) -->
+<div id="bgWrap" class="hidden">
+  <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Bid page background: drawn Christmas castle that slowly pans back and forth -->
+<div id="castle" aria-hidden="true">
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#040815"/><stop offset=".55" stop-color="#10234a"/><stop offset="1" stop-color="#34447a"/>
+    </linearGradient>
+    <radialGradient id="moonGlow"><stop offset="0" stop-color="#fff6d6" stop-opacity=".5"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="snowG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f8ff"/><stop offset="1" stop-color="#8fa3cf"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a4776"/><stop offset="1" stop-color="#232c4d"/></linearGradient>
+    <pattern id="crn" width="25" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#2f3a63"/></pattern>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <g id="cap"><path d="M0 0 L-48 45 L-25 36 L-8 52 L10 34 L32 50 L51 45 Z" fill="#e8f0ff"/></g>
+    <g id="tree">
+      <rect x="-7" y="-14" width="14" height="16" fill="#3b2314"/>
+      <polygon points="-62,-12 62,-12 0,-72" fill="#0f4a2b"/>
+      <polygon points="-50,-56 50,-56 0,-108" fill="#116035"/>
+      <polygon points="-36,-96 36,-96 0,-146" fill="#14753f"/>
+      <path d="M-62 -12 L-38 -26 L-24 -18 L0 -30 L22 -18 L40 -26 L62 -12 Z" fill="#eef4ff" opacity=".9"/>
+      <path d="M-50 -56 L-30 -68 L-16 -60 L0 -72 L16 -60 L30 -68 L50 -56 Z" fill="#eef4ff" opacity=".9"/>
+      <circle cx="-26" cy="-30" r="4.5" fill="#ff3b3b"/><circle cx="24" cy="-38" r="4.5" fill="#ffd34d"/>
+      <circle cx="-12" cy="-70" r="4.5" fill="#4aa8ff"/><circle cx="14" cy="-84" r="4.5" fill="#ff3b3b"/>
+      <circle cx="-8" cy="-118" r="4" fill="#ffd34d"/><circle cx="10" cy="-108" r="4" fill="#4aa8ff"/>
+      <polygon points="0,-166 4,-155 16,-155 6,-148 10,-137 0,-144 -10,-137 -6,-148 -16,-155 -4,-155" fill="#ffd34d" filter="url(#glow)"/>
+    </g>
+    <g id="gift"><rect x="-24" y="-32" width="48" height="32" fill="#c8102e"/><rect x="-4" y="-32" width="8" height="32" fill="#ffd34d"/><rect x="-24" y="-20" width="48" height="6" fill="#ffd34d"/><circle cx="-7" cy="-37" r="7" fill="none" stroke="#ffd34d" stroke-width="4"/><circle cx="7" cy="-37" r="7" fill="none" stroke="#ffd34d" stroke-width="4"/></g>
+    <g id="giftG"><rect x="-24" y="-32" width="48" height="32" fill="#1f8a4c"/><rect x="-4" y="-32" width="8" height="32" fill="#f4f8ff"/><rect x="-24" y="-20" width="48" height="6" fill="#f4f8ff"/><circle cx="-7" cy="-37" r="7" fill="none" stroke="#f4f8ff" stroke-width="4"/><circle cx="7" cy="-37" r="7" fill="none" stroke="#f4f8ff" stroke-width="4"/></g>
+  </defs>
+
+  <!-- sky -->
+  <g class="L L0">
+    <rect x="-300" y="-200" width="2200" height="1200" fill="url(#sky)"/>
+    <circle cx="1230" cy="170" r="190" fill="url(#moonGlow)"/>
+    <circle cx="1230" cy="170" r="46" fill="#fff3cf"/>
+    <circle cx="1216" cy="160" r="9" fill="#efe0b0" opacity=".6"/><circle cx="1244" cy="184" r="6" fill="#efe0b0" opacity=".5"/>
+    <g id="stars"></g>
+  </g>
+
+  <!-- mountains -->
+  <g class="L L1">
+    <path d="M-300 720 L-120 540 L40 650 L210 480 L390 640 L560 530 L740 650 L930 500 L1110 640 L1290 540 L1450 650 L1620 500 L1800 650 L1900 720 L1900 900 L-300 900 Z" fill="#1b2b57"/>
+    <use href="#cap" x="-120" y="540"/><use href="#cap" x="210" y="480"/><use href="#cap" x="560" y="530"/>
+    <use href="#cap" x="930" y="500"/><use href="#cap" x="1290" y="540"/><use href="#cap" x="1620" y="500"/>
+    <path d="M-300 780 L-60 650 L120 740 L330 620 L520 740 L1080 740 L1270 620 L1480 740 L1660 650 L1900 780 L1900 900 L-300 900 Z" fill="#121c42"/>
+  </g>
+
+  <!-- castle -->
+  <g class="L L2">
+    <path d="M-300 775 Q 300 745 800 770 T 1900 770 V 900 H-300 Z" fill="#8ea4d4"/>
+    <use href="#tree" transform="translate(360 805) scale(.75)"/><use href="#tree" transform="translate(1240 805) scale(.75)"/>
+    <use href="#tree" transform="translate(290 810) scale(.55)"/><use href="#tree" transform="translate(1310 810) scale(.55)"/>
+
+    <g fill="url(#stone)">
+      <rect x="500" y="650" width="60" height="140"/><rect x="1040" y="650" width="60" height="140"/>
+      <rect x="640" y="610" width="60" height="180"/><rect x="900" y="610" width="60" height="180"/>
+      <rect x="440" y="600" width="60" height="190"/><rect x="1100" y="600" width="60" height="190"/>
+      <rect x="560" y="530" width="80" height="260"/><rect x="960" y="530" width="80" height="260"/>
+      <rect x="700" y="460" width="200" height="330"/><rect x="770" y="310" width="60" height="150"/>
+    </g>
+    <g fill="url(#crn)">
+      <rect x="500" y="636" width="60" height="14"/><rect x="1040" y="636" width="60" height="14"/>
+      <rect x="640" y="596" width="60" height="14"/><rect x="900" y="596" width="60" height="14"/>
+      <rect x="700" y="446" width="200" height="14"/>
+    </g>
+    <rect x="698" y="442" width="204" height="4" rx="2" fill="#eaf2ff"/>
+
+    <!-- roofs -->
+    <polygon points="755,310 800,200 845,310" fill="#b3202a"/><polygon points="800,200 845,310 800,310" fill="#fff" opacity=".1"/>
+    <polygon points="800,200 790,226 800,220 810,226" fill="#f4f8ff"/>
+    <line x1="800" y1="200" x2="800" y2="168" stroke="#cfd6e6" stroke-width="2"/><polygon points="800,168 838,180 800,192" fill="#c8102e"/>
+    <polygon points="548,530 600,430 652,530" fill="#1f7a45"/><polygon points="600,430 652,530 600,530" fill="#fff" opacity=".1"/>
+    <polygon points="948,530 1000,430 1052,530" fill="#b3202a"/><polygon points="1000,430 1052,530 1000,530" fill="#fff" opacity=".1"/>
+    <polygon points="430,600 470,520 510,600" fill="#b3202a"/><polygon points="1090,600 1130,520 1170,600" fill="#1f7a45"/>
+    <polygon points="600,430 592,448 600,443 608,448" fill="#f4f8ff"/><polygon points="1000,430 992,448 1000,443 1008,448" fill="#f4f8ff"/>
+
+    <!-- gate with wreath -->
+    <path d="M770 790 V 705 Q 800 660 830 705 V 790 Z" fill="#ffd27a" filter="url(#glow)"/>
+    <path d="M800 672 V 790" stroke="#a8671a" stroke-width="2"/>
+    <circle cx="800" cy="660" r="13" fill="none" stroke="#1f8a4c" stroke-width="6"/><circle cx="800" cy="673" r="5" fill="#c8102e"/>
+
+    <!-- windows -->
+    <g fill="#ffd27a" filter="url(#glow)">
+      <rect class="win" x="793" y="350" width="14" height="28" rx="7"/>
+      <rect class="win" x="732" y="490" width="14" height="22" rx="7" style="animation-delay:.4s"/><rect class="win" x="793" y="490" width="14" height="22" rx="7" style="animation-delay:1.1s"/><rect class="win" x="854" y="490" width="14" height="22" rx="7" style="animation-delay:2s"/>
+      <rect class="win" x="732" y="570" width="14" height="22" rx="7" style="animation-delay:1.6s"/><rect class="win" x="854" y="570" width="14" height="22" rx="7" style="animation-delay:.8s"/>
+      <rect class="win" x="732" y="640" width="14" height="22" rx="7" style="animation-delay:2.4s"/><rect class="win" x="854" y="640" width="14" height="22" rx="7" style="animation-delay:.2s"/>
+      <rect class="win" x="593" y="570" width="14" height="22" rx="7" style="animation-delay:1.3s"/><rect class="win" x="593" y="650" width="14" height="22" rx="7" style="animation-delay:2.8s"/>
+      <rect class="win" x="993" y="570" width="14" height="22" rx="7" style="animation-delay:.6s"/><rect class="win" x="993" y="650" width="14" height="22" rx="7" style="animation-delay:1.9s"/>
+      <rect class="win" x="463" y="650" width="14" height="22" rx="7" style="animation-delay:2.2s"/><rect class="win" x="1123" y="650" width="14" height="22" rx="7" style="animation-delay:.9s"/>
+      <rect class="win" x="665" y="670" width="14" height="22" rx="7" style="animation-delay:1.5s"/><rect class="win" x="925" y="670" width="14" height="22" rx="7" style="animation-delay:.3s"/>
+      <rect class="win" x="523" y="700" width="14" height="22" rx="7" style="animation-delay:2.6s"/><rect class="win" x="1063" y="700" width="14" height="22" rx="7" style="animation-delay:1.2s"/>
+    </g>
+    <g id="swags"></g>
+  </g>
+
+  <!-- foreground -->
+  <g class="L L3">
+    <path d="M-300 810 Q 100 780 500 812 T 1300 800 T 1900 815 V 1000 H-300 Z" fill="url(#snowG)"/>
+    <path d="M765 795 L835 795 L980 920 L620 920 Z" fill="#cfdcf3" opacity=".8"/>
+    <use href="#tree" transform="translate(130 900) scale(2.3)"/><use href="#tree" transform="translate(360 872) scale(1.5)"/><use href="#tree" transform="translate(-60 940) scale(2.8)"/>
+    <use href="#tree" transform="translate(1470 900) scale(2.3)"/><use href="#tree" transform="translate(1240 872) scale(1.5)"/><use href="#tree" transform="translate(1660 940) scale(2.8)"/>
+    <use href="#gift" transform="translate(250 890) scale(1.6)"/><use href="#giftG" transform="translate(330 896) scale(1.1)"/>
+    <use href="#giftG" transform="translate(1350 890) scale(1.6)"/><use href="#gift" transform="translate(1270 896) scale(1.1)"/>
+  </g>
+</svg>
+</div>
+
+<div id="lights"></div>
+<canvas id="snow"></canvas>
+
+<header>
+  <h1>Party Favor Bid Board</h1>
+  <div id="userbar" class="hidden">
+    <span id="who"></span>
+    <button class="secondary" id="logoutBtn" style="margin-left:12px">Log out</button>
+  </div>
+</header>
+
+<!-- Countdown (shown on both the login page and the bid page) -->
+<div id="countdown" class="countdown hidden">
+  <div class="cd-info">
+    <div class="cd-label" id="cdLabel">Time until bidding closes</div>
+    <div class="cd-party">🎉 Party date: December 10, 2026</div>
+  </div>
+  <div class="cd-units">
+    <div><b id="cdD">0</b><span>days</span></div>
+    <div><b id="cdH">00</b><span>hrs</span></div>
+    <div><b id="cdM">00</b><span>min</span></div>
+    <div><b id="cdS">00</b><span>sec</span></div>
+  </div>
+</div>
+
+<!-- Login / Register -->
+<div id="authView" class="login card hidden">
+  <div class="xmas-title">🎄 Yule Duel 🎁</div>
+  <p class="xmas-sub">81st Communications Squadron</p>
+  <div class="tabs">
+    <button id="tabLogin" class="active">Log in</button>
+    <button id="tabRegister">Sign up</button>
+  </div>
+  <form id="authForm">
+    <label for="username">Name (First, Last)</label>
+    <input id="username" autocomplete="name" placeholder="First Last" maxlength="40" required>
+    <div class="hint hidden" id="nameHint">Use your real first and last name so we know who is bidding.</div>
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button type="submit" id="authSubmit" style="width:100%">Log in</button>
+    <div class="error" id="authError"></div>
+  </form>
+</div>
+
+<!-- Main -->
+<div id="mainView" class="wrap hidden">
+  <div class="layout">
+    <div class="col">
+      <div class="card">
+        <label>Your current bid</label>
+        <div class="big" id="myBid">No bid yet</div>
+        <div class="bid-break" id="bidBreak"></div>
+        <label for="bidInput">Place a bid ($)</label>
+        <div class="row">
+          <input id="bidInput" type="number" min="0.01" step="0.01" placeholder="0.00">
+          <button id="bidBtn">Place bid</button>
+        </div>
+
+        <label class="ticket" id="ticketBox" for="ticketChk">
+          <input type="checkbox" id="ticketChk">
+          <span class="ticket-text">
+            <strong id="ticketTitle">🎟️ Add a ticket (+$40)</strong>
+            <small id="ticketStatus">You don't have a ticket yet</small>
+          </span>
+        </label>
+
+        <button class="danger" id="clearBtn" type="button">Clear my bid</button>
+
+        <div class="error" id="bidError"></div>
+        <div class="ok" id="bidOk"></div>
+      </div>
+
+      <!-- Party favors box: type the instructions inside #favBody (replace the placeholder text) -->
+      <div class="card favors">
+        <h2 style="margin:0">Party Favors</h2>
+        <p class="fav-sub">Which positions win which favors</p>
+        <div class="fav-body" id="favBody">
+          <span class="fav-empty">Instructions coming soon</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0">Top 10 bidders</h2>
+      <ol id="board"></ol>
+      <div class="empty hidden" id="boardEmpty">No bids yet. Be the first!</div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div id="confirmModal" class="modal hidden">
+  <div class="box">
+    <h3 style="margin-top:0">Confirm your bid</h3>
+    <div class="sum">
+      <div class="sumrow"><span>Your bid</span><strong id="cBid"></strong></div>
+      <div class="sumrow"><span id="cTicketLbl">Ticket</span><strong id="cTicket"></strong></div>
+      <div class="sumrow total"><span>Total contribution</span><strong id="cTotal"></strong></div>
+    </div>
+    <p class="sum-note" id="cNote"></p>
+    <div class="actions">
+      <button class="secondary" id="cancelBid">Cancel</button>
+      <button id="confirmBid">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear bid modal -->
+<div id="clearModal" class="modal hidden">
+  <div class="box">
+    <h3 style="margin-top:0">Clear your bid?</h3>
+    <p>This will set you back to <strong>$0.00</strong>. Your current total of <strong id="clearAmt"></strong> (bid and ticket) will be removed and you'll drop off the Top 10.</p>
+    <div class="actions">
+      <button class="secondary" id="cancelClear">Keep my bid</button>
+      <button class="danger-solid" id="confirmClear">Yes, set me to $0</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const money = (n) => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const TICKET_PRICE = 40;
+let mode = 'login', me = null, pendingAmount = null, pendingTicket = false, poll = null;
+
+async function api(path, body) {
+  const res = await fetch('/api/' + path, {
+    method: body ? 'POST' : 'GET',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+}
+
+function setMode(m) {
+  mode = m;
+  $('tabLogin').classList.toggle('active', m === 'login');
+  $('tabRegister').classList.toggle('active', m === 'register');
+  $('authSubmit').textContent = m === 'login' ? 'Log in' : 'Create account';
+  $('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  $('authError').textContent = '';
+  $('nameHint').classList.toggle('hidden', m !== 'register');
+}
+$('tabLogin').onclick = () => setMode('login');
+$('tabRegister').onclick = () => setMode('register');
+
+$('authForm').onsubmit = async (e) => {
+  e.preventDefault();
+  $('authError').textContent = '';
+  try {
+    me = await api(mode, { username: $('username').value, password: $('password').value });
+    $('password').value = '';
+    showMain();
+  } catch (err) { $('authError').textContent = err.message; }
+};
+
+$('logoutBtn').onclick = async () => {
+  await api('logout', {});
+  me = null; clearInterval(poll);
+  showAuth();
+};
+
+// ---- Christmas decorations (login page only) ----
+(function buildLights() {
+  const colors = ['#ff3b3b', '#ffd34d', '#3dd16b', '#4aa8ff', '#ff7ad9'];
+  const box = $('lights');
+  const count = Math.ceil(window.innerWidth / 34);
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('span');
+    const x = (i / count) * 100;
+    s.style.left = x + '%';
+    s.style.top = (8 + 8 * Math.sin((i / count) * Math.PI * 6)) + 'px';
+    s.style.background = colors[i % colors.length];
+    s.style.boxShadow = '0 0 12px 3px ' + colors[i % colors.length];
+    s.style.animationDelay = (i % 5) * 0.35 + 's';
+    box.appendChild(s);
+  }
+})();
+
+// ---- Castle scene extras: stars and string lights on the walls ----
+(function buildCastle() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const stars = $('stars');
+  for (let i = 0; i < 110; i++) {
+    const c = mk('circle', { cx: -200 + Math.random() * 2000, cy: Math.random() * 560, r: (0.6 + Math.random() * 1.4).toFixed(2), fill: '#fff', opacity: (0.35 + Math.random() * 0.65).toFixed(2) });
+    if (i % 4 === 0) { c.setAttribute('class', 'bulb'); c.style.animationDelay = (Math.random() * 3) + 's'; }
+    stars.appendChild(c);
+  }
+  const colors = ['#ff3b3b', '#ffd34d', '#3dd16b', '#4aa8ff', '#ff7ad9'];
+  const g = $('swags');
+  // [x1, x2, y, sag, bulbs]
+  [[702, 898, 458, 28, 14], [562, 638, 528, 20, 8], [962, 1038, 528, 20, 8],
+   [504, 556, 650, 14, 6], [1044, 1096, 650, 14, 6], [645, 695, 615, 12, 5], [905, 955, 615, 12, 5]]
+  .forEach(([x1, x2, y, sag, n], s) => {
+    g.appendChild(mk('path', { d: `M${x1} ${y} Q ${(x1 + x2) / 2} ${y + 2 * sag} ${x2} ${y}`, fill: 'none', stroke: '#0b0b0b', 'stroke-width': 1.2, opacity: .8 }));
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n, c = colors[(i + s) % colors.length];
+      const b = mk('circle', { cx: x1 + (x2 - x1) * t, cy: y + 4 * sag * t * (1 - t) + 2, r: 3.4, fill: c, filter: 'url(#glow)', class: 'bulb' });
+      b.style.animationDelay = ((i * 0.37 + s * 0.2) % 2.2) + 's';
+      g.appendChild(b);
+    }
+  });
+})();
+
+const snow = { run: false, flakes: [], raf: 0 };
+function snowSize() {
+  const c = $('snow'); c.width = window.innerWidth; c.height = window.innerHeight;
+}
+function snowFrame() {
+  if (!snow.run) return;
+  const c = $('snow'), ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  for (const f of snow.flakes) {
+    f.y += f.v; f.x += Math.sin((f.y + f.p) / 40) * 0.4;
+    if (f.y > c.height + 5) { f.y = -5; f.x = Math.random() * c.width; }
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill();
+  }
+  snow.raf = requestAnimationFrame(snowFrame);
+}
+function startSnow() {
+  if (snow.run || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  snowSize();
+  const n = Math.min(140, Math.floor(window.innerWidth / 9));
+  snow.flakes = Array.from({ length: n }, () => ({
+    x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+    r: 1 + Math.random() * 2.6, v: 0.5 + Math.random() * 1.3, p: Math.random() * 100,
+  }));
+  snow.run = true; snowFrame();
+}
+function stopSnow() { snow.run = false; cancelAnimationFrame(snow.raf); }
+window.addEventListener('resize', () => { if (snow.run) snowSize(); });
+
+function showAuth() {
+  document.body.classList.add('auth');
+  document.body.classList.remove('app');
+  startSnow();
+  $('bgWrap').classList.remove('hidden');
+  $('bgVideo').play().catch(() => {});
+  $('authView').classList.remove('hidden');
+  $('mainView').classList.add('hidden');
+  $('userbar').classList.add('hidden');
+}
+
+function renderMe() {
+  $('who').textContent = me.username;
+  const tix = me.hasTicket ? TICKET_PRICE : 0;
+  $('myBid').textContent = me.bid == null ? 'No bid yet' : money(me.bid + tix);
+  $('bidBreak').textContent = me.bid != null && tix ? 'Bid ' + money(me.bid) + ' + ' + money(tix) + ' ticket' : '';
+  $('ticketChk').checked = !!me.hasTicket; // reflect what is saved on the account
+  updateTicketText();
+  applyLock();
+}
+function updateTicketText() {
+  const chk = $('ticketChk'), on = chk.checked, saved = !!(me && me.hasTicket);
+  $('ticketBox').classList.toggle('have', on);
+  $('ticketTitle').textContent = '🎟️ Ticket (+' + money(TICKET_PRICE).replace('.00', '') + ')';
+  let s = on ? (saved ? 'You have a ticket ✓ (untick to remove it)' : 'Ticket will be added when you place your bid')
+             : (saved ? 'Ticket will be removed when you place your bid' : "You don't have a ticket yet");
+  if (on !== saved && me && me.bid != null) s += '. Leave the amount blank to keep your current bid.';
+  $('ticketStatus').textContent = s;
+}
+$('ticketChk').onchange = updateTicketText;
+
+function showMain() {
+  document.body.classList.remove('auth');
+  document.body.classList.add('app');
+  startSnow();
+  $('bgWrap').classList.add('hidden');
+  $('bgVideo').pause();
+  $('authView').classList.add('hidden');
+  $('mainView').classList.remove('hidden');
+  $('userbar').classList.remove('hidden');
+  renderMe();
+  loadBoard();
+  clearInterval(poll);
+  poll = setInterval(loadBoard, 5000);
+}
+
+async function loadBoard() {
+  try {
+    const rows = await api('leaderboard');
+    const ol = $('board');
+    ol.innerHTML = '';
+    $('boardEmpty').classList.toggle('hidden', rows.length > 0);
+    rows.forEach((r, i) => {
+      const li = document.createElement('li');
+      if (i < 4) li.classList.add('r' + (i + 1));
+      if (me && r.username === me.username) li.classList.add('me');
+      const rank = document.createElement('span'); rank.className = 'rank'; rank.textContent = i + 1;
+      const name = document.createElement('span'); name.className = 'name'; name.textContent = r.username;
+      const amt = document.createElement('span'); amt.className = 'amt'; amt.textContent = money(r.bid);
+      li.append(rank, name, amt);
+      ol.appendChild(li);
+    });
+  } catch {}
+}
+
+$('bidBtn').onclick = () => {
+  $('bidError').textContent = ''; $('bidOk').textContent = '';
+  if (closed) { $('bidError').textContent = 'Bidding is closed'; return; }
+  let amt = parseFloat($('bidInput').value);
+  const had = !!me.hasTicket, hasTicket = $('ticketChk').checked;
+  // Ticket changed and the amount was left blank: keep the existing bid.
+  if (!Number.isFinite(amt) && me.bid != null && hasTicket !== had) amt = me.bid;
+  if (!Number.isFinite(amt) || amt <= 0) { $('bidError').textContent = 'Enter a valid bid amount'; return; }
+  pendingAmount = amt;
+  pendingTicket = hasTicket;
+  const total = amt + (hasTicket ? TICKET_PRICE : 0);
+  $('cBid').textContent = money(amt);
+  $('cTicketLbl').textContent = !hasTicket ? (had ? 'Ticket (removed)' : 'Ticket (none)') : had ? 'Ticket (already added)' : 'Ticket (new)';
+  $('cTicket').textContent = money(hasTicket ? TICKET_PRICE : 0);
+  $('cTotal').textContent = money(total);
+  $('cNote').textContent = hasTicket
+    ? 'You are contributing a total of ' + money(total) + ': your ' + money(amt) + ' bid PLUS the ' + money(TICKET_PRICE) + ' ticket. This replaces your previous bid.'
+    : 'You are contributing ' + money(total) + ' (bid only, no ticket). This replaces your previous bid.';
+  $('confirmModal').classList.remove('hidden');
+};
+$('cancelBid').onclick = () => $('confirmModal').classList.add('hidden');
+$('confirmBid').onclick = async () => {
+  $('confirmBid').disabled = true;
+  try {
+    const r = await api('bid', { amount: pendingAmount, ticket: pendingTicket });
+    me.bid = r.bid; me.hasTicket = r.hasTicket; renderMe();
+    $('bidInput').value = '';
+    $('bidOk').textContent = 'Bid placed!';
+    loadBoard();
+  } catch (err) { $('bidError').textContent = err.message; }
+  $('confirmBid').disabled = false;
+  $('confirmModal').classList.add('hidden');
+};
+
+// ---- Clear my bid ----
+$('clearBtn').onclick = () => {
+  $('bidError').textContent = ''; $('bidOk').textContent = '';
+  if (closed || !me || me.bid == null) return;
+  $('clearAmt').textContent = money(me.bid + (me.hasTicket ? TICKET_PRICE : 0));
+  $('clearModal').classList.remove('hidden');
+};
+$('cancelClear').onclick = () => $('clearModal').classList.add('hidden');
+$('confirmClear').onclick = async () => {
+  $('confirmClear').disabled = true;
+  try {
+    await api('bid/clear', {});
+    me.bid = null; me.hasTicket = false; renderMe();
+    $('bidOk').textContent = 'Your bid was cleared. You are at $0.00.';
+    loadBoard();
+  } catch (err) { $('bidError').textContent = err.message; }
+  $('confirmClear').disabled = false;
+  $('clearModal').classList.add('hidden');
+};
+
+// ---- Countdown + lock when bidding is closed ----
+let closed = false, closesAt = null, clockOffset = 0;
+function applyLock() {
+  ['bidBtn', 'bidInput', 'ticketChk'].forEach((id) => { $(id).disabled = closed; });
+  $('clearBtn').disabled = closed || !me || me.bid == null;
+}
+function tick() {
+  if (!closesAt) return;
+  const left = closesAt - (Date.now() + clockOffset);
+  const was = closed;
+  closed = left <= 0;
+  const s = Math.max(0, Math.floor(left / 1000)), pad = (n) => String(n).padStart(2, '0');
+  $('cdD').textContent = Math.floor(s / 86400);
+  $('cdH').textContent = pad(Math.floor((s % 86400) / 3600));
+  $('cdM').textContent = pad(Math.floor((s % 3600) / 60));
+  $('cdS').textContent = pad(s % 60);
+  $('cdLabel').textContent = closed ? 'Bidding is closed' : 'Time until bidding closes';
+  $('countdown').classList.toggle('closed', closed);
+  if (closed !== was) {
+    applyLock();
+    if (closed) { $('confirmModal').classList.add('hidden'); $('clearModal').classList.add('hidden'); }
+  }
+}
+(async () => {
+  try {
+    const c = await api('config');
+    closesAt = Date.parse(c.closesAt);
+    clockOffset = Date.parse(c.now) - Date.now(); // use the server's clock, not the visitor's
+    $('countdown').classList.remove('hidden');
+    tick(); setInterval(tick, 1000);
+  } catch {}
+})();
+
+(async () => {
+  try { me = await api('me'); showMain(); } catch { showAuth(); }
+})();
+</script>
+</body>
+</html>
