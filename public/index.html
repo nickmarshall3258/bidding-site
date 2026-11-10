@@ -164,6 +164,8 @@
   .modal { z-index: 10; }
   body.app .modal { background: rgba(0,0,0,.6); }
   body.app .modal .box { background: #0f1c15; color: #f3efe2; border: 1px solid rgba(214,174,70,.5); }
+  #integrityModal { z-index: 11; }
+  #integrityModal p { margin: 0; line-height: 1.5; }
   .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
   .tabs button { flex: 1; background: #eef0f4; color: var(--text); }
   .tabs button.active { background: var(--accent); color: #fff; }
@@ -479,6 +481,17 @@
   </div>
 </div>
 
+<!-- Shown after every login and sign-up. Not stored, so it returns next time. -->
+<div id="integrityModal" class="modal hidden">
+  <div class="box">
+    <h3 style="margin-top:0">Bid with integrity</h3>
+    <p>Please have integrity with this board. Only place a bid you actually intend to pay. Do not abuse the system with egregious bets you have no intention of honoring.</p>
+    <div class="actions">
+      <button id="integrityOk" type="button">I understand</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm modal -->
 <div id="confirmModal" class="modal hidden">
   <div class="box">
@@ -549,6 +562,7 @@ $('authForm').onsubmit = async (e) => {
     me = await api(mode, body);
     $('password').value = '';
     showMain();
+    showDisclaimer();
   } catch (err) { $('authError').textContent = err.message; }
 };
 
@@ -662,6 +676,12 @@ function updateTicketText() {
   $('ticketStatus').textContent = s;
 }
 $('ticketChk').onchange = updateTicketText;
+
+function showDisclaimer() {
+  $('integrityModal').classList.remove('hidden');
+  $('integrityOk').focus();
+}
+$('integrityOk').onclick = () => $('integrityModal').classList.add('hidden');
 
 function showMain() {
   document.body.classList.remove('auth');
