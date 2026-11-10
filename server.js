@@ -53,9 +53,11 @@ let BID_CLOSES_AT = new Date(process.env.BID_CLOSES_AT || '2026-12-10T00:00:00-0
 if (isNaN(BID_CLOSES_AT)) BID_CLOSES_AT = new Date('2026-12-10T00:00:00-06:00');
 const isClosed = () => Date.now() >= BID_CLOSES_AT.getTime();
 
-// Names are stored in the "username" column as "First Last".
+// Display names are stored in the "username" column as "First Last". Login is by email.
 const cleanName = (v) => String(v || '').trim().replace(/\s+/g, ' ');
+const cleanEmail = (v) => String(v || '').trim().toLowerCase();
 const NAME_RE = /^\p{L}[\p{L}'.-]*( \p{L}[\p{L}'.-]*)+$/u; // at least two words (first + last)
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Public: lets the countdown work on the login page too.
 app.get('/api/config', (req, res) => {
@@ -65,34 +67,41 @@ app.get('/api/config', (req, res) => {
 // ---- Auth ----
 app.post('/api/register', async (req, res) => {
   const username = cleanName(req.body.username);
+  const email = cleanEmail(req.body.email);
   const password = String(req.body.password || '');
   if (!NAME_RE.test(username) || username.length > 40)
     return res.status(400).json({ error: 'Enter your first and last name (letters only), e.g. Jane Smith' });
+  if (!EMAIL_RE.test(email) || email.length > 254)
+    return res.status(400).json({ error: 'Enter a valid email address' });
   if (password.length < 8)
     return res.status(400).json({ error: 'Password must be at least 8 characters' });
   try {
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await pool.query(
-      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-      [username, hash]
+      'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username',
+      [username, email, hash]
     );
     res.cookie(COOKIE, sign(rows[0]), cookieOpts);
     res.json({ username: rows[0].username, bid: null, hasTicket: false });
   } catch (e) {
-    if (e.code === '23505') return res.status(409).json({ error: 'That name is already registered' });
+    if (e.code === '23505') {
+      const constraint = String(e.constraint || '');
+      const message = constraint.includes('email') ? 'That email is already registered' : 'That name is already registered';
+      return res.status(409).json({ error: message });
+    }
     console.error(e);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
 app.post('/api/login', async (req, res) => {
-  const username = cleanName(req.body.username);
+  const email = cleanEmail(req.body.email);
   const password = String(req.body.password || '');
   try {
-    const { rows } = await pool.query('SELECT * FROM users WHERE lower(username) = lower($1)', [username]);
+    const { rows } = await pool.query('SELECT * FROM users WHERE lower(email) = $1', [email]);
     const user = rows[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash)))
-      return res.status(401).json({ error: 'Invalid name or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     res.cookie(COOKIE, sign(user), cookieOpts);
     res.json({ username: user.username, bid: user.bid_amount === null ? null : Number(user.bid_amount), hasTicket: user.has_ticket });
   } catch (e) {

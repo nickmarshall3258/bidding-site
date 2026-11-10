@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS users (
 -- Ticket status (added for the ticket checkbox). Safe to run on an existing table.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS has_ticket BOOLEAN NOT NULL DEFAULT false;
 
--- Names are now "First Last", so keep them unique regardless of capitalization.
+-- Names are "First Last" and stay unique regardless of capitalization.
+-- email is the login. username remains the display name.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS users_name_lower_idx ON users (lower(username));
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_idx ON users (lower(email));
 
 CREATE INDEX IF NOT EXISTS users_bid_idx ON users (bid_amount DESC NULLS LAST, bid_at ASC);
