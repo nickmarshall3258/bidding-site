@@ -656,7 +656,7 @@ function updateTicketText() {
   const chk = $('ticketChk'), on = chk.checked, saved = !!(me && me.hasTicket);
   $('ticketBox').classList.toggle('have', on);
   $('ticketTitle').textContent = '🎟️ Ticket (+' + money(TICKET_PRICE).replace('.00', '') + ') - Check if you HAVE a ticket';
-  let s = on ? (saved ? 'You have a ticket ✓ (untick to remove it)' : 'You have a ticket and will add ' + money(TICKET_PRICE).replace('.00', '') + 'to your bid.'
+  let s = on ? (saved ? 'You have a ticket ✓ (untick to remove it)' : 'You have a ticket and will add ' + money(TICKET_PRICE).replace('.00', '') + ' to your bid.')
              : (saved ? 'Ticket will be removed when you place your bid' : "You do not have a ticket yet");
   if (on !== saved && me && me.bid != null) s += '. Leave the amount blank to keep your current bid.';
   $('ticketStatus').textContent = s;
