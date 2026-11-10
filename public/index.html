@@ -5,7 +5,7 @@
 <meta name="google" content="notranslate">
 <meta http-equiv="content-language" content="en">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Party Favor Bid Board</title>
+<title>Yule Duel VIP Package Bidding War</title>
 <style>
   :root {
     --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280; --border: #e5e7eb; --accent: #2f5bea;
@@ -17,7 +17,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); }
   header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
-  header h1 { margin: 0; font-size: 20px; }
+  header h1 { margin: 0; font-size: 18px; line-height: 1.3; }
   .wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
   .hidden { display: none !important; }
@@ -96,13 +96,13 @@
   body.app button.secondary { background: rgba(255,255,255,.14); color: #f3efe2; box-shadow: none; }
   body.app .error { color: #ff9a9a; }
   body.app .ok { color: #7ee2a8; }
-  body.app .empty { color: #b9c7bb; }
-  body.app li { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #f3efe2; }
-  body.app li.r1 { background: #c8102e; border-color: #e8475f; border-left-color: #7a0a1c; color: #fff; box-shadow: 0 0 14px rgba(200,16,46,.5); }
-  body.app li.r2 { background: #1f8a4c; border-color: #46c57f; border-left-color: #0d5a2b; color: #fff; box-shadow: 0 0 14px rgba(31,138,76,.5); }
-  body.app li.r3 { background: #ffffff; border-color: #e2e8f0; border-left-color: #b8c4d6; color: #1d2330; box-shadow: 0 0 14px rgba(255,255,255,.35); }
-  body.app li.r4 { background: #a8dcff; border-color: #d2ecff; border-left-color: #3b8fd9; color: #0f2a44; box-shadow: 0 0 14px rgba(120,200,255,.45); }
-  body.app li.me .name::after { color: inherit; opacity: .7; }
+  body.auth .empty, body.app .empty { color: #b9c7bb; }
+  body.auth li, body.app li { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #f3efe2; }
+  body.auth li.r1, body.app li.r1 { background: #c8102e; border-color: #e8475f; border-left-color: #7a0a1c; color: #fff; box-shadow: 0 0 14px rgba(200,16,46,.5); }
+  body.auth li.r2, body.app li.r2 { background: #1f8a4c; border-color: #46c57f; border-left-color: #0d5a2b; color: #fff; box-shadow: 0 0 14px rgba(31,138,76,.5); }
+  body.auth li.r3, body.app li.r3 { background: #ffffff; border-color: #e2e8f0; border-left-color: #b8c4d6; color: #1d2330; box-shadow: 0 0 14px rgba(255,255,255,.35); }
+  body.auth li.r4, body.app li.r4 { background: #a8dcff; border-color: #d2ecff; border-left-color: #3b8fd9; color: #0f2a44; box-shadow: 0 0 14px rgba(120,200,255,.45); }
+  body.auth li.me .who-name::after, body.app li.me .who-name::after { color: inherit; opacity: .75; }
   .bid-break { font-size: 13px; color: #b9c7bb; margin: -10px 0 14px; min-height: 0; }
   .bid-break:empty { display: none; }
   .col { display: flex; flex-direction: column; gap: 20px; }
@@ -115,8 +115,29 @@
   .ticket.have { background: rgba(31,138,76,.22); border-color: #46c57f; }
   .ticket.have input { accent-color: #1f8a4c; }
   .fav-sub { margin: 4px 0 14px; color: #b9c7bb; font-size: 14px; }
-  .fav-body { min-height: 170px; border: 2px dashed rgba(214,174,70,.35); border-radius: 10px; padding: 14px; display: flex; align-items: center; justify-content: center; text-align: center; color: #f3efe2; }
-  .fav-body .fav-empty { color: #8fa296; font-style: italic; }
+  .prize-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+  .prize-table th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #cdbf9a; font-weight: 700; padding: 0 12px 2px; }
+  .prize-table td { padding: 12px 14px; vertical-align: top; }
+  .prize-table tr td:first-child { border-radius: 10px 0 0 10px; width: 56px; font-size: 22px; font-weight: 800; text-align: center; }
+  .prize-table tr td:last-child { border-radius: 0 10px 10px 0; }
+  .prize-table .tier-name { display: block; font-size: 16px; }
+  .prize-table .tier-tag { display: block; font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .prize-table .yours { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; background: rgba(0,0,0,.18); border-radius: 999px; padding: 3px 8px; }
+  .prize-table tr.r3 .yours, .prize-table tr.r4 .yours { background: rgba(0,0,0,.08); }
+  .prize-table .plus { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+  .prize-table ul { list-style: disc; margin: 0; padding-left: 1.15em; }
+  body.app .prize-table li { display: list-item; background: transparent; border: 0; box-shadow: none; margin: 0 0 4px; padding: 0; border-radius: 0; color: inherit; }
+  .prize-table tr.r1 td { background: #c8102e; color: #fff; }
+  .prize-table tr.r2 td { background: #1f8a4c; color: #fff; }
+  .prize-table tr.r3 td { background: #ffffff; color: #1d2330; }
+  .prize-table tr.r4 td { background: #a8dcff; color: #0f2a44; }
+  @media (max-width: 760px) {
+    .prize-table, .prize-table tbody, .prize-table tr, .prize-table td { display: block; width: auto; }
+    .prize-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .prize-table tr td:first-child { border-radius: 10px 10px 0 0; width: auto; text-align: left; padding-bottom: 0; }
+    .prize-table tr td:nth-child(2) { padding-bottom: 0; }
+    .prize-table tr td:last-child { border-radius: 0 0 10px 10px; }
+  }
   .sum { margin: 12px 0 8px; border: 1px solid rgba(214,174,70,.35); border-radius: 10px; overflow: hidden; }
   .sumrow { display: flex; justify-content: space-between; padding: 9px 12px; font-size: 15px; }
   .sumrow + .sumrow { border-top: 1px solid rgba(255,255,255,.1); }
@@ -127,7 +148,9 @@
     background: rgba(8,18,13,.72); backdrop-filter: blur(6px); border: 1px solid rgba(214,174,70,.45); border-radius: 12px; color: #f3efe2;
     box-shadow: 0 8px 28px rgba(0,0,0,.45); }
   body.auth .countdown { max-width: 380px; flex-direction: column; text-align: center; }
-  body.auth .login { margin: 16px auto 40px; }
+  .auth-stack { position: relative; z-index: 2; width: calc(100% - 32px); max-width: 380px; margin: 16px auto 40px; display: flex; flex-direction: column; gap: 16px; }
+  body.auth .login { margin: 0; max-width: none; }
+  .auth-board h2 { font-family: Georgia, 'Times New Roman', serif; color: #f6d77a; font-size: 22px; }
   .cd-label { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: #f6d77a; }
   .cd-party { font-size: 14px; color: #cdd8cf; margin-top: 2px; }
   .cd-units { display: flex; gap: 8px; }
@@ -154,9 +177,11 @@
   ol { list-style: none; margin: 12px 0 0; padding: 0; }
   li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); border-left-width: 6px; }
   li .rank { width: 24px; font-weight: 700; }
-  li .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  li .name { flex: 1; min-width: 0; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  li .who-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  li .place-title { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.3; }
   li .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
-  li.me .name::after { content: " (you)"; color: var(--muted); font-weight: 400; }
+  li.me .who-name::after { content: " (you)"; font-weight: 400; opacity: .8; }
   li.r1 { background: var(--gold); border-left-color: var(--gold-b); }
   li.r2 { background: var(--silver); border-left-color: var(--silver-b); }
   li.r3 { background: var(--bronze); border-left-color: var(--bronze-b); }
@@ -287,7 +312,7 @@
 <canvas id="snow"></canvas>
 
 <header>
-  <h1>Party Favor Bid Board</h1>
+  <h1>Yule Duel VIP Package Bidding War</h1>
   <div id="userbar" class="hidden">
     <span id="who"></span>
     <button class="secondary" id="logoutBtn" style="margin-left:12px">Log out</button>
@@ -309,22 +334,34 @@
 </div>
 
 <!-- Login / Register -->
-<div id="authView" class="login card hidden">
-  <div class="xmas-title">🎄 Yule Duel 🎁</div>
-  <p class="xmas-sub">81st Communications Squadron</p>
-  <div class="tabs">
-    <button id="tabLogin" class="active">Log in</button>
-    <button id="tabRegister">Sign up</button>
+<div id="authView" class="auth-stack hidden">
+  <div class="login card">
+    <div class="xmas-title">🎄 Yule Duel 🎁</div>
+    <p class="xmas-sub">81st Communications Squadron</p>
+    <div class="tabs">
+      <button id="tabLogin" class="active">Log in</button>
+      <button id="tabRegister">Sign up</button>
+    </div>
+    <form id="authForm">
+      <div id="nameField" class="hidden">
+        <label for="username">Name (First, Last)</label>
+        <input id="username" autocomplete="name" placeholder="First Last" maxlength="40">
+        <div class="hint" id="nameHint">Use your real first and last name so we know who is bidding.</div>
+      </div>
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit" id="authSubmit" style="width:100%">Log in</button>
+      <div class="error" id="authError"></div>
+    </form>
   </div>
-  <form id="authForm">
-    <label for="username">Name (First, Last)</label>
-    <input id="username" autocomplete="name" placeholder="First Last" maxlength="40" required>
-    <div class="hint hidden" id="nameHint">Use your real first and last name so we know who is bidding.</div>
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" required>
-    <button type="submit" id="authSubmit" style="width:100%">Log in</button>
-    <div class="error" id="authError"></div>
-  </form>
+  <div class="login card auth-board">
+    <h2 style="margin:0">Top 10 bidders</h2>
+    <p class="fav-sub">Places 1–4 wear the same colors as the VIP packages they win.</p>
+    <ol id="publicBoard"></ol>
+    <div class="empty hidden" id="publicBoardEmpty">No bids yet. Be the first!</div>
+  </div>
 </div>
 
 <!-- Main -->
@@ -355,18 +392,87 @@
         <div class="ok" id="bidOk"></div>
       </div>
 
-      <!-- Party favors box: type the instructions inside #favBody (replace the placeholder text) -->
       <div class="card favors">
-        <h2 style="margin:0">Party Favors</h2>
-        <p class="fav-sub">Which positions win which favors</p>
-        <div class="fav-body" id="favBody">
-          <span class="fav-empty">Instructions coming soon</span>
-        </div>
+        <h2 style="margin:0">VIP Packages</h2>
+        <p class="fav-sub">Top four bids win a package. Each row uses the same color as that place on the leaderboard, and “Your current package” follows your live rank.</p>
+        <table class="prize-table">
+          <thead>
+            <tr><th>Place</th><th>Title</th><th>Package</th></tr>
+          </thead>
+          <tbody>
+            <tr class="r1" data-rank="1">
+              <td>1</td>
+              <td>
+                <strong class="tier-name">King or Queen</strong>
+                <span class="tier-tag">Tier 1 · #1 bid</span>
+                <span class="yours hidden">Your current package</span>
+              </td>
+              <td>
+                <p class="plus">All the below, plus:</p>
+                <ul>
+                  <li>A <strong>CROWN</strong> befitting your title</li>
+                  <li>Is deemed <strong>ARBITRATOR</strong> of games (i.e., tie-breaker)</li>
+                  <li>+1 raffle ticket (4 total)</li>
+                </ul>
+              </td>
+            </tr>
+            <tr class="r2" data-rank="2">
+              <td>2</td>
+              <td>
+                <strong class="tier-name">Duke or Duchess</strong>
+                <span class="tier-tag">Tier 2 · #2 bid</span>
+                <span class="yours hidden">Your current package</span>
+              </td>
+              <td>
+                <p class="plus">All the below, plus:</p>
+                <ul>
+                  <li><strong>TOASTING RIGHTS</strong> for the night wherein all must obey</li>
+                  <li>+1 raffle ticket (3 total)</li>
+                </ul>
+              </td>
+            </tr>
+            <tr class="r3" data-rank="3">
+              <td>3</td>
+              <td>
+                <strong class="tier-name">Count or Countess</strong>
+                <span class="tier-tag">Tier 3 · #3 bid</span>
+                <span class="yours hidden">Your current package</span>
+              </td>
+              <td>
+                <p class="plus">All the below, plus:</p>
+                <ul>
+                  <li>One free <strong>DRINK</strong> from the bar</li>
+                  <li>Priority <strong>QUEUING</strong> for the bar</li>
+                  <li>VIP Parking</li>
+                  <li>+1 raffle ticket (2 total)</li>
+                </ul>
+              </td>
+            </tr>
+            <tr class="r4" data-rank="4">
+              <td>4</td>
+              <td>
+                <strong class="tier-name">Baron or Baroness</strong>
+                <span class="tier-tag">Tier 4 · #4 bid</span>
+                <span class="yours hidden">Your current package</span>
+              </td>
+              <td>
+                <ul>
+                  <li>Receive a <strong>TITLE</strong> that attendees must refer them as</li>
+                  <li>Special <strong>SEATING</strong> at the head table</li>
+                  <li>Priority <strong>QUEUING</strong> for the buffet</li>
+                  <li>Goblet befitting position</li>
+                  <li>+1 raffle ticket (1 total)</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <div class="card">
       <h2 style="margin:0">Top 10 bidders</h2>
+      <p class="fav-sub">Colors match the VIP package that place currently wins.</p>
       <ol id="board"></ol>
       <div class="empty hidden" id="boardEmpty">No bids yet. Be the first!</div>
     </div>
@@ -406,6 +512,7 @@
 const $ = (id) => document.getElementById(id);
 const money = (n) => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const TICKET_PRICE = 40;
+const PLACE_TITLES = ['King or Queen', 'Duke or Duchess', 'Count or Countess', 'Baron or Baroness'];
 let mode = 'login', me = null, pendingAmount = null, pendingTicket = false, poll = null;
 
 async function api(path, body) {
@@ -421,12 +528,14 @@ async function api(path, body) {
 
 function setMode(m) {
   mode = m;
-  $('tabLogin').classList.toggle('active', m === 'login');
-  $('tabRegister').classList.toggle('active', m === 'register');
-  $('authSubmit').textContent = m === 'login' ? 'Log in' : 'Create account';
-  $('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  const register = m === 'register';
+  $('tabLogin').classList.toggle('active', !register);
+  $('tabRegister').classList.toggle('active', register);
+  $('authSubmit').textContent = register ? 'Create account' : 'Log in';
+  $('password').autocomplete = register ? 'new-password' : 'current-password';
+  $('nameField').classList.toggle('hidden', !register);
+  $('username').required = register;
   $('authError').textContent = '';
-  $('nameHint').classList.toggle('hidden', m !== 'register');
 }
 $('tabLogin').onclick = () => setMode('login');
 $('tabRegister').onclick = () => setMode('register');
@@ -435,7 +544,9 @@ $('authForm').onsubmit = async (e) => {
   e.preventDefault();
   $('authError').textContent = '';
   try {
-    me = await api(mode, { username: $('username').value, password: $('password').value });
+    const body = { email: $('email').value, password: $('password').value };
+    if (mode === 'register') body.username = $('username').value;
+    me = await api(mode, body);
     $('password').value = '';
     showMain();
   } catch (err) { $('authError').textContent = err.message; }
@@ -528,6 +639,8 @@ function showAuth() {
   $('authView').classList.remove('hidden');
   $('mainView').classList.add('hidden');
   $('userbar').classList.add('hidden');
+  setMode('login');
+  ensureBoardPoll();
 }
 
 function renderMe() {
@@ -560,27 +673,56 @@ function showMain() {
   $('mainView').classList.remove('hidden');
   $('userbar').classList.remove('hidden');
   renderMe();
+  ensureBoardPoll();
+}
+
+function ensureBoardPoll() {
   loadBoard();
   clearInterval(poll);
   poll = setInterval(loadBoard, 5000);
 }
 
+function fillBoard(ol, emptyEl, rows) {
+  ol.innerHTML = '';
+  emptyEl.classList.toggle('hidden', rows.length > 0);
+  let myRank = 0;
+  rows.forEach((r, i) => {
+    const li = document.createElement('li');
+    if (i < 4) li.classList.add('r' + (i + 1));
+    const mine = !!(me && r.username === me.username);
+    if (mine) { li.classList.add('me'); myRank = i + 1; }
+    const rank = document.createElement('span'); rank.className = 'rank'; rank.textContent = i + 1;
+    const name = document.createElement('span'); name.className = 'name';
+    const who = document.createElement('span'); who.className = 'who-name'; who.textContent = r.username;
+    name.appendChild(who);
+    if (i < 4) {
+      const title = document.createElement('span');
+      title.className = 'place-title';
+      title.textContent = PLACE_TITLES[i];
+      name.appendChild(title);
+    }
+    const amt = document.createElement('span'); amt.className = 'amt'; amt.textContent = money(r.bid);
+    li.append(rank, name, amt);
+    ol.appendChild(li);
+  });
+  return myRank;
+}
+
+function markPrize(rank) {
+  document.querySelectorAll('.prize-table tbody tr').forEach((tr) => {
+    const mine = rank >= 1 && rank <= 4 && Number(tr.dataset.rank) === rank;
+    tr.classList.toggle('is-yours', mine);
+    const badge = tr.querySelector('.yours');
+    if (badge) badge.classList.toggle('hidden', !mine);
+  });
+}
+
 async function loadBoard() {
   try {
     const rows = await api('leaderboard');
-    const ol = $('board');
-    ol.innerHTML = '';
-    $('boardEmpty').classList.toggle('hidden', rows.length > 0);
-    rows.forEach((r, i) => {
-      const li = document.createElement('li');
-      if (i < 4) li.classList.add('r' + (i + 1));
-      if (me && r.username === me.username) li.classList.add('me');
-      const rank = document.createElement('span'); rank.className = 'rank'; rank.textContent = i + 1;
-      const name = document.createElement('span'); name.className = 'name'; name.textContent = r.username;
-      const amt = document.createElement('span'); amt.className = 'amt'; amt.textContent = money(r.bid);
-      li.append(rank, name, amt);
-      ol.appendChild(li);
-    });
+    const myRank = fillBoard($('board'), $('boardEmpty'), rows);
+    fillBoard($('publicBoard'), $('publicBoardEmpty'), rows);
+    markPrize(myRank);
   } catch {}
 }
 
